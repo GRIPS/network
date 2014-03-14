@@ -4,4 +4,6 @@
 .DS_Store
 
 listen_telemetry
+listen_command
 fake_telemetry
+fake_command
