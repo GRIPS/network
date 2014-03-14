@@ -1,6 +1,15 @@
 /*
 
-  Pair, Pair3B, Float2B
+  Clock, Pair, Pair3B, Float2B
+
+  -----
+  Clock
+  -----
+  This type is used to store SystemTime, which is a 48-bit value.
+  Implementation-wise, this class is just a redefinition of a UINT64.
+  It is the responsibility of all functions that accept Clock to use only the
+  lower 48 bits (6 bytes).  Also, using this type in a structure would use
+  8 bytes of storage rather than just 6 bytes.
 
   -----
   Pair, Pair3B

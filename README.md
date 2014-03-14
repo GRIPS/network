@@ -1,9 +1,11 @@
 GRIPS Network Interface
 =======================
 
-This code implements and tests the specification of the GRIPS network interface:
+This C++ code implements and tests the specification of the GRIPS network interface:
 
 https://docs.google.com/document/d/1DubfOC0UKNMLMgQmaWAg3FIBkPa_e8ORo-74ypTPjdE/edit?usp=sharing
+
+To use these classes code in your actual software, you need to be able to incorporate C++ code (as opposed to just C code, for example).
 
 How to build
 ------------
