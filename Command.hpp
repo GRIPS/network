@@ -60,23 +60,6 @@
 
 #define COMMAND_PACKET_MAX_SIZE 262
 
-class Command : public ByteString {
-private:
-
-public:
-    Command(uint16_t heroes_c = 0, uint16_t sas_c = 0);
-
-    //Retrieve the command keys
-    uint16_t get_heroes_command();
-    uint16_t get_sas_command();
-
-    uint16_t lookup_payload_length(uint16_t heroes_cm, uint16_t sas_cm = 0);
-    uint16_t lookup_sas_payload_length(uint16_t sas_cm);
-
-    //insertion operator << for adding a Command object to a CommandPacket object
-    friend ByteString &operator<<(ByteString &bs, Command &cm);
-};
-
 class CommandPacket : public Packet {
 private:
     virtual void finish();
@@ -85,7 +68,7 @@ private:
 
 public:
     //Use this constuctor when assembling a command packet for sending
-    CommandPacket(uint8_t targetID, uint16_t number);
+    CommandPacket(uint8_t systemID, uint8_t cmdType);
 
     //Use this constructor when handling a received command packet
     CommandPacket(const uint8_t *ptr, uint16_t num);
@@ -95,23 +78,13 @@ public:
     //This packet is non-functional!  Be sure not to use without reassignment!
     CommandPacket(const void *ptr);
 
-    //Checks for the HEROES sync word and a valid checksum
+    //Checks for the GRIPS sync word and a valid checksum
     virtual bool valid();
 
-    void readNextCommandTo(Command &cm);
+    uint8_t getSystemID();
+    uint8_t getCmdType();
 
-    uint8_t getTargetID();
-    uint16_t getSequenceNumber();
-};
-
-class CommandQueue : public ByteStringQueue {
-
-public:
-    CommandQueue() {};
-    CommandQueue(CommandPacket &cp);
-
-    //Returns the number of commands added
-    int add_packet(CommandPacket &cp);
+    uint8_t getCounter();
 };
 
 class CommandPacketQueue : public ByteStringQueue {
