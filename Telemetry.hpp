@@ -38,7 +38,7 @@ protected:
 
 public:
     //Use this constructor when assembling a telemetry packet for sending
-    TelemetryPacket(uint8_t systemID, uint8_t tmType);
+    TelemetryPacket(uint8_t systemID, uint8_t tmType, uint16_t counter, Clock systemTime);
 
     //Use this constructor when handling a received telemetry packet
     TelemetryPacket(const uint8_t *ptr, uint16_t num);
@@ -57,10 +57,7 @@ public:
     uint16_t getSync();
 
     uint16_t getCounter();
-    void setCounter(uint16_t counter);
-
     Clock getSystemTime();
-    void setSystemTime(Clock systemTime);
 };
 
 class TelemetryPacketQueue : public ByteStringQueue {

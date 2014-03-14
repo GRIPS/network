@@ -30,11 +30,7 @@ int main()
         count++;
         clock += 5000000;
 
-        TelemetryPacket tp(SYSTEMID_FLIGHT, TMTYPE_CUSTOM);
-
-        tp.setCounter(count);
-
-        tp.setSystemTime(clock);
+        TelemetryPacket tp(SYSTEMID_FLIGHT, TMTYPE_CUSTOM, count, clock);
 
         tp << (double)(count);
         if(count % 2) tp << (float)count;

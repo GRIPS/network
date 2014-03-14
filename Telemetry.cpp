@@ -32,12 +32,12 @@ class TelemetryPacketSASException : public std::exception
         }
 } tpSASException;
 
-TelemetryPacket::TelemetryPacket(uint8_t systemID, uint8_t tmType)
+TelemetryPacket::TelemetryPacket(uint8_t systemID, uint8_t tmType, uint16_t counter, Clock systemTime)
 {
-    //Zeros are checksum, payload length, and packet counter
-    *this << (uint16_t)0 << systemID << tmType << (uint16_t)0 << (uint16_t)0;
-    //Zeros are 6 bytes for the SystemTime
-    *this << (uint32_t)0 << (uint16_t)0;
+    //Zeros are checksum and payload length
+    *this << (uint16_t)0 << systemID << tmType << (uint16_t)0 << counter;
+    *this << (uint32_t)(systemTime & 0xFFFFFFFF);
+    *this << (uint16_t)((systemTime >> 32) & 0xFFFF);
     setReadIndex(INDEX_PAYLOAD);
 }
 
@@ -103,11 +103,6 @@ uint16_t TelemetryPacket::getCounter()
     return value;
 }
 
-void TelemetryPacket::setCounter(uint16_t counter)
-{
-    replace(INDEX_COUNTER, counter);
-}
-
 Clock TelemetryPacket::getSystemTime()
 {
     uint32_t value1;
@@ -117,14 +112,6 @@ Clock TelemetryPacket::getSystemTime()
     this->readAtTo(INDEX_SYSTEMTIME+4, value2);
     value = ((Clock)value2 << 32) + value1;
     return value;
-}
-
-void TelemetryPacket::setSystemTime(Clock systemTime)
-{
-    uint32_t value1 = systemTime & 0xFFFFFFFF;
-    uint16_t value2 = (systemTime >> 32) & 0xFFFF;
-    replace(INDEX_SYSTEMTIME, value1);
-    replace(INDEX_SYSTEMTIME+4, value2);
 }
 
 TelemetryPacketQueue::TelemetryPacketQueue() : filter_systemID(false), filter_tmType(false)
@@ -162,7 +149,7 @@ void TelemetryPacketQueue::add_file(const char* file)
 
     uint16_t length;
 
-    TelemetryPacket tp((uint8_t)0x0, (uint8_t)0x0);
+    TelemetryPacket tp(NULL);
 
     std::ifstream ifs(file);
 
