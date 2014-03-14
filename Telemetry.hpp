@@ -55,8 +55,11 @@ public:
     uint8_t getTmType();
     
     uint16_t getSync();
-    Clock getSystemTime();
 
+    uint16_t getCounter();
+    void setCounter(uint16_t counter);
+
+    Clock getSystemTime();
     void setSystemTime(Clock systemTime);
 };
 

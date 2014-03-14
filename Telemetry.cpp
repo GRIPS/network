@@ -10,6 +10,7 @@
 #define INDEX_SYSTEM_ID 4
 #define INDEX_TELEMETRY_TYPE 5
 #define INDEX_PAYLOAD_LENGTH 6
+#define INDEX_COUNTER 8
 #define INDEX_SYSTEMTIME 10
 #define INDEX_PAYLOAD 16
 
@@ -93,6 +94,18 @@ uint16_t TelemetryPacket::getSync()
     uint16_t value;
     this->readAtTo(0, value);
     return value;
+}
+
+uint16_t TelemetryPacket::getCounter()
+{
+    uint16_t value;
+    this->readAtTo(INDEX_COUNTER, value);
+    return value;
+}
+
+void TelemetryPacket::setCounter(uint16_t counter)
+{
+    replace(INDEX_COUNTER, counter);
 }
 
 Clock TelemetryPacket::getSystemTime()
