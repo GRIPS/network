@@ -54,7 +54,7 @@
 #include <pthread.h>
 
 #define PACKET_MAX_SIZE 1024
-#define PACKET_HEROES_SYNC_WORD (uint16_t)0xc39a
+#define PACKET_GRIPS_SYNC_WORD (uint16_t)0xEB90
 
 //Useful base class, may wish to break out
 class ByteString {

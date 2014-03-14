@@ -10,7 +10,7 @@
 #include "Packet.hpp"
 #include "lib_crc/lib_crc.h"
 
-#define INDEX_CHECKSUM 6
+#define INDEX_CHECKSUM 2
 
 using std::ostream;
 
@@ -162,20 +162,20 @@ uint16_t ByteString::checksum()
 {
     unsigned short value = 0xffff;
     for(uint16_t i=0;i<length;i++) value = update_crc_16(value, (char)buffer[i]);
-    //Flip the byte order for the checksum for writing as a word
-    return ((value & 0xff) << 8) | (value >> 8);
+    //Return the checksum as is, without the byte swap that HEROES required
+    return value;
 }
 
 Packet::Packet()
 {
-    *this << PACKET_HEROES_SYNC_WORD;
-    setReadIndex(sizeof(PACKET_HEROES_SYNC_WORD));
+    *this << PACKET_GRIPS_SYNC_WORD;
+    setReadIndex(sizeof(PACKET_GRIPS_SYNC_WORD));
 }
 
 Packet::Packet(const uint8_t *ptr, uint16_t num)
 {
     this->append_bytes(ptr, num);
-    setReadIndex(sizeof(PACKET_HEROES_SYNC_WORD));
+    setReadIndex(sizeof(PACKET_GRIPS_SYNC_WORD));
 }
 
 bool Packet::valid()
@@ -186,7 +186,7 @@ bool Packet::valid()
 
     uint16_t syncword;
     this->readAtTo(0, syncword);
-    bool syncword_valid = (syncword == PACKET_HEROES_SYNC_WORD);
+    bool syncword_valid = (syncword == PACKET_GRIPS_SYNC_WORD);
 
     //Not long enough to even have a proper checksum!
     if(getLength() < INDEX_CHECKSUM+2) return false;
