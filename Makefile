@@ -8,7 +8,7 @@ GCC_VERSION_GE_43 := $(shell expr `g++ -dumpversion | cut -f2 -d.` \>= 3)
 
 INCLUDE =
 
-CFLAGS = -Wall $(INCLUDE) -Wno-unknown-pragmas -Wno-overloaded-virtual
+CFLAGS = -Wall $(INCLUDE) -Wno-overloaded-virtual
 ifeq "$(GCC_VERSION_GE_43)" "1"
     CFLAGS += -std=gnu++0x
 endif
