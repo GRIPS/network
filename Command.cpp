@@ -35,10 +35,10 @@ class CommandPacketEndException : public std::exception
         }
 } cpEndException;
 
-CommandPacket::CommandPacket(uint8_t systemID, uint8_t cmdType)
+CommandPacket::CommandPacket(uint8_t systemID, uint8_t cmdType, uint8_t counter)
 {
-    //Zeros are checksum, payload length, and counter
-    *this << (uint16_t)0 << systemID << cmdType << (uint16_t)0 << (uint16_t)0;
+    //Zeros are checksum and payload length
+    *this << (uint16_t)0 << systemID << cmdType << counter << (uint8_t)0;
     setReadIndex(INDEX_PAYLOAD);
 }
 
@@ -85,9 +85,9 @@ uint8_t CommandPacket::getSystemID()
     return value;
 }
 
-uint16_t CommandPacket::getCounter()
+uint8_t CommandPacket::getCounter()
 {
-    uint16_t value;
+    uint8_t value;
     this->readAtTo(INDEX_COUNTER, value);
     return value;
 }

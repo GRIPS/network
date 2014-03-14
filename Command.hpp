@@ -68,7 +68,7 @@ private:
 
 public:
     //Use this constuctor when assembling a command packet for sending
-    CommandPacket(uint8_t systemID, uint8_t cmdType);
+    CommandPacket(uint8_t systemID, uint8_t cmdType, uint8_t counter);
 
     //Use this constructor when handling a received command packet
     CommandPacket(const uint8_t *ptr, uint16_t num);
