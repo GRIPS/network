@@ -85,6 +85,13 @@ uint8_t CommandPacket::getSystemID()
     return value;
 }
 
+uint8_t CommandPacket::getCmdType()
+{
+    uint8_t value;
+    this->readAtTo( INDEX_CMDTYPE, value);
+    return value;
+}
+
 uint8_t CommandPacket::getCounter()
 {
     uint8_t value;
