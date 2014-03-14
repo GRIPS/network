@@ -3,20 +3,6 @@
   TelemetryPacket and TelemetryPacketQueue
   derived from Packet and ByteStringQueue
 
-//Telemetry packet from SAS containing an array
-uint8_t image[5] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
-TelemetryPacket tp2(0x70, 0x30);
-tp2 << (uint32_t)0xEFBEADDE;
-tp2.append_bytes(image, 5);
-std::cout << tp2 << std::endl;
-
-//Parsing telemetry packets from a static file
-TelemetryPacketQueue tpq;
-tpq.filterSourceID(0x30);
-tpq.add_file("sample.dat");
-TelemetryPacket tp(NULL);
-if(!tpq.empty()) tpq >> tp;
-
 */
 
 #ifndef _TELEMETRY_HPP_
@@ -48,7 +34,7 @@ public:
     //This packet is non-functional!  Be sure not to use without reassignment!
     TelemetryPacket(const void *ptr);
 
-    //Checks for the HEROES sync word and a valid checksum
+    //Checks for the GRIPS sync word and a valid checksum
     virtual bool valid();
 
     uint8_t getSystemID();
