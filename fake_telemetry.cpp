@@ -16,10 +16,11 @@
 #include "Telemetry.hpp"
 #include "types.hpp"
 
-uint32_t count = 0;
-
 int main()
 {
+    uint32_t count = 0;
+    Clock clock = 0x123456789ABCDE;
+
     TelemetrySender telSender(IP_LOOPBACK, PORT_TM);
 
     while(1)    // run forever
@@ -27,12 +28,13 @@ int main()
         usleep(500000);
 
         count++;
+        clock += 5000000;
+
         TelemetryPacket tp(SYSTEMID_FLIGHT, TMTYPE_CUSTOM);
 
         tp.setCounter(count);
 
-        Clock time = 0x123456789ABCDE;
-        tp.setSystemTime(time);
+        tp.setSystemTime(clock);
 
         tp << (double)(count);
         if(count % 2) tp << (float)count;
