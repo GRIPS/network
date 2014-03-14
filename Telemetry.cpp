@@ -6,12 +6,11 @@
 
 #include "Telemetry.hpp"
 
-#define INDEX_TELEMETRY_TYPE 2
-#define INDEX_SOURCE_ID 3
-#define INDEX_PAYLOAD_LENGTH 4
-#define INDEX_CHECKSUM 6
-#define INDEX_NANOSECONDS 8
-#define INDEX_SECONDS 12
+#define INDEX_CHECKSUM 2
+#define INDEX_SYSTEM_ID 4
+#define INDEX_TELEMETRY_TYPE 5
+#define INDEX_PAYLOAD_LENGTH 6
+#define INDEX_SYSTEMTIME 10
 #define INDEX_PAYLOAD 16
 
 using std::ostream;
@@ -32,12 +31,12 @@ class TelemetryPacketSASException : public std::exception
         }
 } tpSASException;
 
-TelemetryPacket::TelemetryPacket(uint8_t typeID, uint8_t sourceID)
+TelemetryPacket::TelemetryPacket(uint8_t systemID, uint8_t tmType)
 {
-    //Zeros are payload length and checksum
-    *this << typeID << sourceID << (uint16_t)0 << (uint16_t)0;
-    //Zeros are nanoseconds and seconds
-    *this << (uint32_t)0 << (uint32_t)0;
+    //Zeros are checksum, payload length, and packet counter
+    *this << (uint16_t)0 << systemID << tmType << (uint16_t)0 << (uint16_t)0;
+    //Zero is the SystemTime
+    *this << (Clock)0;
     setReadIndex(INDEX_PAYLOAD);
 }
 
@@ -75,17 +74,17 @@ bool TelemetryPacket::valid()
     return Packet::valid();
 }
 
-uint8_t TelemetryPacket::getTypeID()
+uint8_t TelemetryPacket::getTmType()
 {
     uint8_t value;
     this->readAtTo(INDEX_TELEMETRY_TYPE, value);
     return value;
 }
 
-uint8_t TelemetryPacket::getSourceID()
+uint8_t TelemetryPacket::getSystemID()
 {
     uint8_t value;
-    this->readAtTo(INDEX_SOURCE_ID, value);
+    this->readAtTo(INDEX_SYSTEM_ID, value);
     return value;
 }
 
@@ -96,100 +95,54 @@ uint16_t TelemetryPacket::getSync()
     return value;
 }
 
-uint32_t TelemetryPacket::getSeconds()
+Clock TelemetryPacket::getSystemTime()
 {
-    uint32_t value;
-    this->readAtTo(INDEX_SECONDS, value);
+    uint32_t value1;
+    uint16_t value2;
+    Clock value;
+    this->readAtTo(INDEX_SYSTEMTIME, value1);
+    this->readAtTo(INDEX_SYSTEMTIME+2, value2);
+    value = ((Clock)value2 << 32) + value1;
     return value;
 }
 
-uint32_t TelemetryPacket::getNanoseconds()
+void TelemetryPacket::setSystemTime(Clock systemTime)
 {
-    uint32_t value;
-    this->readAtTo(INDEX_NANOSECONDS, value);
-    return value;
+    uint32_t value1 = systemTime & 0xFFFF;
+    uint16_t value2 = (systemTime >> 32) & 0xFF;
+    replace(INDEX_SYSTEMTIME, value1);
+    replace(INDEX_SYSTEMTIME+2, value2);
 }
 
-int TelemetryPacket::getSAS()
-{
-    uint16_t value;
-    if(getLength() < INDEX_PAYLOAD+sizeof(value)) throw tpSASException;
-    readAtTo(INDEX_PAYLOAD, value);
-    setReadIndex(INDEX_PAYLOAD+sizeof(value));
-    switch(value) {
-    case SAS1_SYNC_WORD:
-        return 1;
-    case SAS2_SYNC_WORD:
-        return 2;
-    default:
-        throw tpSASException;
-    }
-    return 0; //never reached
-}
-
-void TelemetryPacket::setSAS(int id)
-{
-    uint16_t value;
-    switch(id) {
-    case 1:
-        value = SAS1_SYNC_WORD;
-        break;
-    case 2:
-        value = SAS2_SYNC_WORD;
-        break;
-    default:
-        throw tpSASException;
-    }
-    if(getLength() == INDEX_PAYLOAD) {
-        append(value);
-    } else if(getLength() >= INDEX_PAYLOAD+sizeof(value)) {
-        replace(INDEX_PAYLOAD, value);
-    } else throw tpSASException;
-}
-
-void TelemetryPacket::setTimeAndFinish()
-{
-    timespec now;
-    clock_gettime(CLOCK_REALTIME, &now);
-    setTimeAndFinish(now);
-}
-
-void TelemetryPacket::setTimeAndFinish(const struct timespec &time)
-{
-    replace(INDEX_NANOSECONDS, (uint32_t)time.tv_nsec);
-    replace(INDEX_SECONDS, (uint32_t)time.tv_sec);
-    finish();
-}
-
-TelemetryPacketQueue::TelemetryPacketQueue() : filter_typeID(false), filter_sourceID(false)
+TelemetryPacketQueue::TelemetryPacketQueue() : filter_systemID(false), filter_tmType(false)
 {
 }
 
-void TelemetryPacketQueue::filterTypeID(uint8_t typeID)
+void TelemetryPacketQueue::filterTmType(uint8_t tmType)
 {
-    filter_typeID = true;
-    i_typeID = typeID;
+    filter_tmType = true;
+    i_tmType = tmType;
 }
 
-void TelemetryPacketQueue::filterSourceID(uint8_t sourceID)
+void TelemetryPacketQueue::filterSystemID(uint8_t systemID)
 {
-    filter_sourceID = true;
-    i_sourceID = sourceID;
+    filter_systemID = true;
+    i_systemID = systemID;
 }
 
 void TelemetryPacketQueue::resetFilters()
 {
-    filter_typeID = false;
-    filter_sourceID = false;
+    filter_tmType = false;
+    filter_systemID = false;
 }
 
 void TelemetryPacketQueue::add_file(const char* file)
 {
     uint32_t ct_sync = 0, ct_length = 0, ct_valid = 0;
-    uint32_t ct_typeID = 0, ct_sourceID = 0;
+    uint32_t ct_tmType = 0, ct_systemID = 0;
     std::streampos cur;
 
-    bool pass_sourceID, pass_typeID;
+    bool pass_systemID, pass_tmType;
 
     uint8_t buffer[TELEMETRY_PACKET_MAX_SIZE];
     buffer[0] = 0x9a;
@@ -221,11 +174,11 @@ void TelemetryPacketQueue::add_file(const char* file)
 
                 if(tp.valid()) {
                     ct_valid++;
-                    pass_sourceID = !(filter_sourceID && !(tp.getSourceID() == i_sourceID));
-                    pass_typeID = !(filter_typeID && !(tp.getTypeID() == i_typeID));
-                    if(pass_sourceID) ct_sourceID++;
-                    if(pass_typeID) ct_typeID++;
-                    if(pass_sourceID && pass_typeID) *this << tp;
+                    pass_systemID = !(filter_systemID && !(tp.getSystemID() == i_systemID));
+                    pass_tmType = !(filter_tmType && !(tp.getTmType() == i_tmType));
+                    if(pass_systemID) ct_systemID++;
+                    if(pass_tmType) ct_tmType++;
+                    if(pass_systemID && pass_tmType) *this << tp;
                 }
 
                 ifs.seekg(cur);
@@ -237,11 +190,11 @@ void TelemetryPacketQueue::add_file(const char* file)
     std::cout << ct_sync << " sync words found, ";
     std::cout << ct_valid << " packets with valid checksums\n";
 
-    if(filter_sourceID) {
-        std::cout << ct_sourceID << " packets with with the filtered source ID\n";
+    if(filter_systemID) {
+        std::cout << ct_systemID << " packets with with the filtered source ID\n";
     }
-    if(filter_typeID) {
-        std::cout << ct_typeID << " packets with with the filtered type ID\n";
+    if(filter_tmType) {
+        std::cout << ct_tmType << " packets with with the filtered type ID\n";
     }
 
 }

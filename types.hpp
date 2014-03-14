@@ -105,6 +105,8 @@ public:
     friend ByteString& operator>>(ByteString& bs, Float2B& f2);
 };
 
+typedef uint64_t Clock;
+
 //Functions for manipulating bitfields (no range checking!)
 uint64_t bitread(const void *buf, uint16_t bit_location, uint8_t nbits);
 void bitwrite(void *buf, uint16_t bit_location, uint8_t nbits, uint64_t input);
