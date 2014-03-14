@@ -3,4 +3,5 @@
 *.out
 .DS_Store
 
+listen_telemetry
 fake_telemetry
