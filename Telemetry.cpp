@@ -36,8 +36,8 @@ TelemetryPacket::TelemetryPacket(uint8_t systemID, uint8_t tmType)
 {
     //Zeros are checksum, payload length, and packet counter
     *this << (uint16_t)0 << systemID << tmType << (uint16_t)0 << (uint16_t)0;
-    //Zero is the SystemTime
-    *this << (Clock)0;
+    //Zeros are 6 bytes for the SystemTime
+    *this << (uint32_t)0 << (uint16_t)0;
     setReadIndex(INDEX_PAYLOAD);
 }
 
@@ -114,17 +114,17 @@ Clock TelemetryPacket::getSystemTime()
     uint16_t value2;
     Clock value;
     this->readAtTo(INDEX_SYSTEMTIME, value1);
-    this->readAtTo(INDEX_SYSTEMTIME+2, value2);
+    this->readAtTo(INDEX_SYSTEMTIME+4, value2);
     value = ((Clock)value2 << 32) + value1;
     return value;
 }
 
 void TelemetryPacket::setSystemTime(Clock systemTime)
 {
-    uint32_t value1 = systemTime & 0xFFFF;
-    uint16_t value2 = (systemTime >> 32) & 0xFF;
+    uint32_t value1 = systemTime & 0xFFFFFFFF;
+    uint16_t value2 = (systemTime >> 32) & 0xFFFF;
     replace(INDEX_SYSTEMTIME, value1);
-    replace(INDEX_SYSTEMTIME+2, value2);
+    replace(INDEX_SYSTEMTIME+4, value2);
 }
 
 TelemetryPacketQueue::TelemetryPacketQueue() : filter_systemID(false), filter_tmType(false)
