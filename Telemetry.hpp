@@ -3,23 +3,33 @@
   TelemetryPacket and TelemetryPacketQueue
   derived from Packet and ByteStringQueue
 
-  See Packet.hpp for details for how to work with ByteString-derived classes
+  See Packet.hpp for details for how to work with ByteString-derived classes.
+  The checksum and the payload length are calculated whenever the packet is
+  "used": either with the method outputTo() or inserted into an ostream.
+  You can use UDPSender-based and UDPReceiver-based classes to communicate with
+  Packets.
 
-  Example of how to create a new telemetry packet:
+
+  Create a new telemetry packet with the header information:
 
   tp = TelemetryPacket(0x00, 0x10, 1234, 13579);
 
-  Example of how to add data to a telemetry packet's payload:
+  Load information using insertion operators:
 
-  tp << (uint16_t)57 << (double)1.56;
+  tp << (int16_t)57;
+  tp << (uint8_t)123 << (double)1.56;
 
-  Example of how to create a telemetry packet from a byte array:
+  Alternatively, create a telemetry packet from a byte array:
 
   tp = TelemetryPacket(buffer, num_bytes);
 
-  Example of how to extract data from such a telemetry packet:
+  Example of how to extract data from a telemetry packet:
 
+  int16_t x;
+  uint8_t y;
+  double z;
   tp >> x >> y;
+  tp >> z;
 
 */
 
