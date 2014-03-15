@@ -29,3 +29,43 @@ Since the specifications of the contents of packets has not been decided, for no
 
 * `fake_telemetry` will send fake telemetry packets to port 60501 on localhost
 * `fake_command` will send fake command packets to port 50501 on localhost
+
+Example output
+--------------
+If you run `fake_telemetry` in one shell and `listen_telemetry` in another shell, you will see output that looks like below.
+
+`fake_telemetry` shell:
+```
+90eb6c1f00100c0001001e08e7785634000000000000f03f0000803f
+Packet size: 28
+90eb3c380010080002005e53337956340000000000000040
+Packet size: 24
+90eb08a100100c0003009e9e7f795634000000000000084000004040
+Packet size: 28
+90eb37ff001008000400dee9cb7956340000000000001040
+Packet size: 24
+```
+
+`listen_telemetry` shell:
+```
+Packet received, 28 bytes
+  Raw: 90eb6c1f00100c0001001e08e7785634000000000000f03f0000803f
+  SystemID: 0x00
+  TmType: 0x10
+  SystemTime: 0x345678e7081e
+Packet received, 24 bytes
+  Raw: 90eb3c380010080002005e53337956340000000000000040
+  SystemID: 0x00
+  TmType: 0x10
+  SystemTime: 0x34567933535e
+Packet received, 28 bytes
+  Raw: 90eb08a100100c0003009e9e7f795634000000000000084000004040
+  SystemID: 0x00
+  TmType: 0x10
+  SystemTime: 0x3456797f9e9e
+Packet received, 24 bytes
+  Raw: 90eb37ff001008000400dee9cb7956340000000000001040
+  SystemID: 0x00
+  TmType: 0x10
+  SystemTime: 0x345679cbe9de
+```
