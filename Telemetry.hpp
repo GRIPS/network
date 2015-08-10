@@ -42,7 +42,7 @@
 #include "Packet.hpp"
 #include "types.hpp"
 
-#define TELEMETRY_PACKET_MAX_SIZE 1024
+#define TELEMETRY_PACKET_MAX_SIZE 1500
 
 class TelemetryPacket : public Packet {
 protected:
