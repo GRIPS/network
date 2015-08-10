@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
             std::cout << "Packet received, " << packet_length << " bytes\n";
 
             TelemetryPacket tp = TelemetryPacket(packet, packet_length);
-            std::cout << "  Raw: " << tp << std::endl;
 
             if (tp.valid()){
+                std::cout << "  Raw: " << tp << std::endl;
                 printf("  SystemID: 0x%02x\n", tp.getSystemID());
                 printf("  TmType: 0x%02x\n", tp.getTmType());
                 printf("  SystemTime: 0x%06llx\n", (uint64_t)tp.getSystemTime());

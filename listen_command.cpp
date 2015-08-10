@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
             std::cout << "Packet received, " << packet_length << " bytes\n";
 
             CommandPacket cp = CommandPacket(packet, packet_length);
-            std::cout << "  Raw: " << cp << std::endl;
 
             if (cp.valid()){
+                std::cout << "  Raw: " << cp << std::endl;
                 printf("  SystemID: 0x%02x\n", cp.getSystemID());
                 printf("  CmdType: 0x%02x\n", cp.getCmdType());
             } else {
