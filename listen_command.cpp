@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     udpreceiver.init_connection();
 
     while(1){
-        uint16_t packet_length = udpreceiver.listen();
-        if( packet_length != 0){
+        int packet_length = udpreceiver.listen();
+        if( packet_length > 0){
             uint8_t *packet = new uint8_t[packet_length];
             udpreceiver.get_packet(packet);
 

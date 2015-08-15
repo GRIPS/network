@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     udpreceiver.init_connection();
 
     while(1){
-        uint16_t packet_length = udpreceiver.listen();
-        if( packet_length != 0){
+        int packet_length = udpreceiver.listen();
+        if( packet_length > 0){
             uint8_t *packet = new uint8_t[packet_length];
             udpreceiver.get_packet(packet);
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
                 std::cout << "  Raw: " << tp << std::endl;
                 printf("  SystemID: 0x%02x\n", tp.getSystemID());
                 printf("  TmType: 0x%02x\n", tp.getTmType());
-                printf("  SystemTime: 0x%06llx\n", (uint64_t)tp.getSystemTime());
+                printf("  SystemTime: 0x%12lx\n", (uint64_t)tp.getSystemTime());
             } else {
                 std::cout << "  Invalid packet!\n";
             }

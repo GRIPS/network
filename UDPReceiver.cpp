@@ -14,26 +14,17 @@ UDPReceiver::~UDPReceiver() {
     close_connection();
 }
 
-unsigned int UDPReceiver::listen( void ){
-    /* Block until receive message from a client */
+int UDPReceiver::listen( void ){
+    /* Receive a message from a client or times out */
     recvMsgSize = recvfrom(sock, payload, sizeof(payload), 0,
                            (struct sockaddr *) &senderAddr, &cliAddrLen);
-        
-    if (recvMsgSize < 0){
-        //printf("recvfrom() failed");
-        return 0;
-    } else {
-        //printf("received  %u bytes\n", recvMsgSize);
-        return recvMsgSize;
-    }
+    return recvMsgSize;
 }
 
 void UDPReceiver::init_connection( void ){
     /* Create socket for sending/receiving datagrams */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
         printf("UDPReceiver: socket() failed\n");
-    //if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0)
-    //    printf("Unable to put client sock into non-blocking/async mode");
 
     /* Construct local address structure */
     memset(&myAddr, 0, sizeof(myAddr));   /* Zero out structure */
@@ -47,6 +38,12 @@ void UDPReceiver::init_connection( void ){
 
     /* Set the size of the in-out parameter */
     cliAddrLen = sizeof(senderAddr);
+
+    /* Set a one-second timeout */
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 }
 
 void UDPReceiver::get_packet( uint8_t *packet ){

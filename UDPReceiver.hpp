@@ -22,7 +22,7 @@ public:
     UDPReceiver( unsigned short port );
     ~UDPReceiver();
         
-    unsigned int listen( void );
+    int listen( void );
     void get_packet( uint8_t *packet  );
     void init_connection( void );
     void close_connection( void );
