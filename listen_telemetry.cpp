@@ -19,13 +19,20 @@ int main(int argc, char *argv[])
 
             std::cout << "Packet received, " << packet_length << " bytes\n";
 
+            uint16_t reported_length = *((uint16_t *)(packet + 6));
+
             TelemetryPacket tp = TelemetryPacket(packet, packet_length);
+
+            tp.readAtTo(6, reported_length);
 
             if (tp.valid()){
                 std::cout << "  Raw: " << tp << std::endl;
-                printf("  SystemID: 0x%02x\n", tp.getSystemID());
-                printf("  TmType: 0x%02x\n", tp.getTmType());
-                printf("  SystemTime: 0x%12lx\n", (uint64_t)tp.getSystemTime());
+                printf("  SystemID: 0x%02x", tp.getSystemID());
+                printf("  TmType: 0x%02x", tp.getTmType());
+                printf("  Length: %4d", tp.getLength());
+                printf("  SystemTime: 0x%012lx\n", (uint64_t)tp.getSystemTime());
+
+                if (reported_length+16 != packet_length) return -1;
             } else {
                 std::cout << "  Invalid packet!\n";
             }

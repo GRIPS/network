@@ -145,7 +145,7 @@ void TelemetryPacketQueue::add_file(const char* file)
     bool pass_systemID, pass_tmType;
 
     uint8_t buffer[TELEMETRY_PACKET_MAX_SIZE];
-    buffer[0] = 0x9a;
+    buffer[0] = 0x90;
 
     uint16_t length;
 
@@ -155,12 +155,12 @@ void TelemetryPacketQueue::add_file(const char* file)
 
     while (ifs.good()) {
 
-        if(ifs.get() == 0x9a) {
-            if(ifs.peek() == 0xc3) {
+        if(ifs.get() == 0x90) {
+            if(ifs.peek() == 0xeb) {
                 ct_sync++; // sync word found
 
                 cur = ifs.tellg(); // points one byte into sync word
-                ifs.seekg(3, std::ios::cur);
+                ifs.seekg(5, std::ios::cur);
                 ifs.read((char *)&length, 2);
 
                 if(length > TELEMETRY_PACKET_MAX_SIZE-16) continue; //invalid payload size
@@ -178,7 +178,13 @@ void TelemetryPacketQueue::add_file(const char* file)
                     pass_tmType = !(filter_tmType && !(tp.getTmType() == i_tmType));
                     if(pass_systemID) ct_systemID++;
                     if(pass_tmType) ct_tmType++;
-                    if(pass_systemID && pass_tmType) *this << tp;
+                    if(pass_systemID && pass_tmType) {
+                        *this << tp;
+                        if ((ct_valid % 100) == 0) {
+                            std::cout << '.';
+                            std::cout.flush();
+                        }
+                    }
                 }
 
                 ifs.seekg(cur);
@@ -187,6 +193,7 @@ void TelemetryPacketQueue::add_file(const char* file)
 
     }
 
+    std::cout << std::endl;
     std::cout << ct_sync << " sync words found, ";
     std::cout << ct_valid << " packets with valid checksums\n";
 
