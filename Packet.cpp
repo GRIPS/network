@@ -215,18 +215,17 @@ ByteStringQueue::~ByteStringQueue()
 
 int ByteStringQueue::lock()
 {
-    struct timespec interval;
+    struct timespec interval, remaining;
     interval.tv_sec = 0;
     interval.tv_nsec = 5000000;
-
-    int status = -1;
 
     int attempts = 1;
     int result = pthread_mutex_trylock(&flag);
 
     while ((result != 0) && (attempts < 50)) {
-        while (status == -1) status = nanosleep(&interval, NULL);
-        status = -1;
+        while (nanosleep(&interval, &remaining) == -1) {
+            interval = remaining;
+        }
 
         attempts++;
         result = pthread_mutex_trylock(&flag);
