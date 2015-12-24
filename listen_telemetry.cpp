@@ -31,10 +31,11 @@ int main(int argc, char *argv[])
                 printf("  TmType: 0x%02x", tp.getTmType());
                 printf("  Length: %4d", tp.getLength());
                 printf("  SystemTime: 0x%012lx\n", (uint64_t)tp.getSystemTime());
-
-                if (reported_length+16 != packet_length) return -1;
+                if (reported_length+16 != packet_length) {
+                    std::cout << "  Length mismatch: reported+16 is " << reported_length+16 << ", actual is " << packet_length << std::endl;
+                }
             } else {
-                std::cout << "  Invalid packet!\n";
+                printf("  Invalid packet! %02x%02x %02x%02x %02x %02x\n", packet[0], packet[1], packet[2], packet[3], packet[4], packet[5]);
             }
 
             delete packet;
