@@ -134,7 +134,7 @@ private:
 
 public:
     ByteStringQueue();
-    ~ByteStringQueue();
+    virtual ~ByteStringQueue();
 
     //Mutex-based locking of the queue
     int lock();

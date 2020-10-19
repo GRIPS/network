@@ -13,7 +13,7 @@ protected:
 public:
     UDPSender( void );
     UDPSender( const char *ip, unsigned short port );
-    ~UDPSender();
+    virtual ~UDPSender();
         
     virtual void send(  Packet *packet  );
     int init_connection( void );
